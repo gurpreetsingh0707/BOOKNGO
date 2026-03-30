@@ -16,8 +16,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/booking-p
 
 // Auth Routes
 app.use('/api/auth', require('./routes/authroutes'));
-// Add this line in server.js after auth routes:
-app.use('/api/bookings', require('./routes/bookingRoutes'));
 
 // Booking Routes
 app.use('/api/bookings', require('./routes/bookingRoutes'));
