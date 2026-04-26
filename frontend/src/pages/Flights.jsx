@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PaymentModal from '../components/PaymentModal';
 import bookingService from '../services/bookingService';
 
-const Flights = () => {
+const Flights = ({ searchTerm }) => {
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(null);
@@ -10,6 +10,17 @@ const Flights = () => {
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState(1);
   const [paymentBooking, setPaymentBooking] = useState(null);
+
+  const filteredFlights = useMemo(() => {
+    if (!searchTerm) return flights;
+    const lowerSearch = searchTerm.toLowerCase();
+    return flights.filter(f => 
+      f.from?.toLowerCase().includes(lowerSearch) ||
+      f.to?.toLowerCase().includes(lowerSearch) ||
+      f.name?.toLowerCase().includes(lowerSearch) ||
+      f.airline?.toLowerCase().includes(lowerSearch)
+    );
+  }, [flights, searchTerm]);
 
   useEffect(() => {
     fetchFlights();
@@ -100,14 +111,16 @@ const Flights = () => {
       <div className="max-w-6xl mx-auto px-4 pb-20">
         <div className="mb-6 flex justify-between items-center text-slate-300">
           <h2 className="text-2xl font-bold text-white">Available Flights</h2>
-          <p>{flights.length} results found</p>
+          <p>{filteredFlights.length} results found</p>
         </div>
 
-        {flights.length === 0 ? (
-          <div className="text-center text-slate-500 py-12 bg-slate-800/30 rounded-2xl border border-white/5 backdrop-blur-sm">No flights available</div>
+        {filteredFlights.length === 0 ? (
+          <div className="text-center text-slate-500 py-12 bg-slate-800/30 rounded-2xl border border-white/5 backdrop-blur-sm">
+            {searchTerm ? `No flights found matching "${searchTerm}"` : 'No flights available'}
+          </div>
         ) : (
           <div className="space-y-4">
-            {flights.map((flight) => {
+            {filteredFlights.map((flight) => {
               const seatsLeft = flight.availableSeats - flight.bookedSeats;
 
               return (

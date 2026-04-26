@@ -17,9 +17,8 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/', label: 'Home', icon: '🏠' },
-    { path: '/movies', label: 'Movies', icon: '🎬' },
-    { path: '/trains', label: 'Trains', icon: '🚂' },
-    { path: '/buses', label: 'Buses', icon: '🚌' },
+    { path: '/shows', label: 'Shows', icon: '🎬' },
+    { path: '/travel', label: 'Travel', icon: '🌍' },
     { path: '/hotels', label: 'Hotels', icon: '🏨' },
     { path: '/bookings', label: 'Bookings', icon: '📋' },
   ];

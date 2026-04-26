@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import bookingService from '../services/bookingService';
 
@@ -90,13 +91,14 @@ const BookingHistory = () => {
             <Navbar />
 
             {/* Header */}
-            <div className="bg-gradient-to-b from-purple-900 to-slate-900 px-4 py-12">
+            <div className="relative bg-gradient-to-b from-purple-900 to-slate-900 px-4 py-12">
                 <div className="max-w-6xl mx-auto">
                     <button
                         onClick={() => navigate('/')}
-                        className="mb-6 px-4 py-2 rounded bg-slate-700 text-white font-semibold hover:bg-slate-600"
+                        className="absolute left-6 top-6 bg-white/10 hover:bg-white/20 text-slate-200 p-2 rounded-full border border-white/20 backdrop-blur-sm transition-all flex items-center justify-center group shadow-md hover:shadow-lg"
+                        title="Go Back"
                     >
-                        ← Back
+                        <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
                     </button>
                     <h1 className="text-5xl font-bold text-white mb-4">📋 My Bookings</h1>
                     <p className="text-xl text-slate-300">Total: {bookings.length} bookings</p>

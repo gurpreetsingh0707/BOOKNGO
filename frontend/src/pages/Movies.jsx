@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Search } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import PaymentModal from '../components/PaymentModal';
 import { AuthContext } from '../context/AuthContext';
 import bookingService from '../services/bookingService';
 
-const Movies = () => {
-  const navigate = useNavigate();
+const Movies = ({ category = 'movie', searchTerm = '' }) => {
   const { auth } = useContext(AuthContext);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,14 +14,21 @@ const Movies = () => {
   const [paymentBooking, setPaymentBooking] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
 
+  const filteredMovies = useMemo(() => {
+    return movies.filter(movie => 
+      movie.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      movie.language?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [movies, searchTerm]);
+
   useEffect(() => {
     fetchMovies();
-  }, []);
+  }, [category]);
 
   const fetchMovies = async () => {
     try {
       setLoading(true);
-      const response = await bookingService.getAllMovies();
+      const response = await bookingService.getAllMovies(category);
       setMovies(response.data.data || response.data.movies || []);
     } catch (error) {
       console.error('Error:', error);
@@ -65,48 +72,30 @@ const Movies = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex flex-col">
-        <Navbar />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin text-5xl mb-4">🎬</div>
-            <p className="text-gray-600">Loading movies...</p>
-          </div>
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="animate-spin text-5xl mb-4">{category === 'movie' ? '🎬' : '🎭'}</div>
+          <p className="text-gray-600">Loading {category === 'movie' ? 'movies' : 'live shows'}...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      <Navbar />
-
-      {/* Header */}
-      <div className="relative overflow-hidden py-16 sm:py-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-purple-600/20"></div>
-        <div className="relative max-w-6xl mx-auto px-4">
-          <button
-            onClick={() => navigate('/')}
-            className="absolute left-6 top-6 bg-white text-gray-800 px-4 py-2 rounded-lg border border-white/30 hover:bg-white/90 transition"
-          >
-            ← Back
-          </button>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 text-center">
-            🎬 Book Movie Tickets
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl text-center mx-auto">
-            {movies.length} movies showing now. Grab your popcorn!
-          </p>
-        </div>
-      </div>
-
+    <div className="w-full">
       {/* Movies List */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        {movies.length === 0 ? (
-          <div className="text-center text-gray-500 py-12">No movies available</div>
+      <div className="max-w-6xl mx-auto px-4 pb-20">
+        <div className="mb-6 flex justify-between items-center text-slate-700">
+          <h2 className="text-2xl font-bold">{category === 'movie' ? 'Available Movies' : 'Live Performances'}</h2>
+          <p>{filteredMovies.length} results found</p>
+        </div>
+        {filteredMovies.length === 0 ? (
+          <div className="text-center text-gray-500 py-12 bg-white/50 backdrop-blur-sm rounded-2xl border border-white/20 shadow-sm">
+            No movies match your search.
+          </div>
         ) : (
           <div className="space-y-4">
-            {movies.map((movie) => {
+            {filteredMovies.map((movie) => {
               const seatsLeft = movie.availableSeats;
 
               return (
@@ -116,7 +105,7 @@ const Movies = () => {
                     <div className="md:col-span-2">
                       <div className="flex items-center space-x-4">
                         <div className="h-16 w-16 bg-red-100 rounded-xl flex items-center justify-center text-3xl shrink-0">
-                          🍿
+                          {movie.category === 'live_show' ? '🎭' : '🍿'}
                         </div>
                         <div>
                           <h3 className="text-xl font-bold text-gray-900">{movie.title}</h3>

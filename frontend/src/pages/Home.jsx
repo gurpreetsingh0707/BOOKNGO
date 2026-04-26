@@ -9,31 +9,22 @@ const Home = () => {
 
   const bookingCategories = [
     {
-      id: 'movies',
-      path: '/movies',
-      title: 'Movies',
-      description: 'Book your favorite movie tickets',
-      icon: '🎬',
+      id: 'shows',
+      path: '/shows',
+      title: 'Shows',
+      description: 'Book movies and live show tickets',
+      icon: '🎭',
       gradient: 'from-red-500 via-pink-500 to-rose-500',
       lightGradient: 'from-red-50 to-pink-50',
     },
     {
-      id: 'trains',
-      path: '/trains',
-      title: 'Trains',
-      description: 'Fast and comfortable rail journeys',
-      icon: '🚂',
+      id: 'travel',
+      path: '/travel',
+      title: 'Travel',
+      description: 'Book flights, trains, and buses',
+      icon: '🌍',
       gradient: 'from-blue-500 via-cyan-500 to-teal-500',
       lightGradient: 'from-blue-50 to-cyan-50',
-    },
-    {
-      id: 'buses',
-      path: '/buses',
-      title: 'Buses',
-      description: 'Affordable intercity bus travel',
-      icon: '🚌',
-      gradient: 'from-orange-500 via-yellow-500 to-amber-500',
-      lightGradient: 'from-orange-50 to-yellow-50',
     },
     {
       id: 'hotels',
@@ -43,15 +34,6 @@ const Home = () => {
       icon: '🏨',
       gradient: 'from-green-500 via-emerald-500 to-teal-500',
       lightGradient: 'from-green-50 to-emerald-50',
-    },
-    {
-      id: 'flights',
-      path: '/flights',
-      title: 'Flights',
-      description: 'Fly anywhere, anytime',
-      icon: '✈️',
-      gradient: 'from-sky-500 via-blue-500 to-indigo-500',
-      lightGradient: 'from-sky-50 to-indigo-50',
     },
   ];
 
@@ -92,7 +74,7 @@ const Home = () => {
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">BOOKNGO</span>
             </motion.h1>
             <motion.p variants={itemVariants} className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto mb-10 font-light">
-              Book movies, trains, buses, hotels, and flights all in one place. Seamless, secure, and extraordinary.
+              Book movies, live shows, trains, buses, hotels, and flights all in one place. Seamless, secure, and extraordinary.
             </motion.p>
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-center gap-6">
               <div className="bg-white/5 backdrop-blur-xl rounded-full px-8 py-4 border border-white/10 text-slate-200 font-semibold shadow-[0_0_15px_rgba(255,255,255,0.05)]">
@@ -200,7 +182,7 @@ const Home = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { title: '50% Off Movies', desc: 'On your first booking', color: 'from-pink-500 via-red-500 to-yellow-500' },
+            { title: '50% Off Shows', desc: 'On your first booking', color: 'from-pink-500 via-red-500 to-yellow-500' },
             { title: 'Free Train Booking', desc: 'Upto ₹500 cashback', color: 'from-cyan-500 via-blue-500 to-indigo-500' },
             { title: '20% Hotel Cashback', desc: 'On bookings above ₹5000', color: 'from-emerald-500 via-green-500 to-teal-500' },
           ].map((offer, idx) => (
@@ -235,9 +217,9 @@ const Home = () => {
             <div>
               <h4 className="font-bold text-white mb-6 uppercase tracking-wider">Services</h4>
               <ul className="space-y-3 text-slate-400">
-                <li><a href="#" className="hover:text-blue-400 transition-colors">Movies</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition-colors">Trains</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition-colors">Buses</a></li>
+                <li><Link to="/shows" className="hover:text-blue-400 transition-colors">Shows</Link></li>
+                <li><Link to="/travel" className="hover:text-blue-400 transition-colors">Travel</Link></li>
+                <li><Link to="/hotels" className="hover:text-blue-400 transition-colors">Hotels</Link></li>
               </ul>
             </div>
             <div>

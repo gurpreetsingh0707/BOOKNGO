@@ -1,18 +1,26 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import PaymentModal from '../components/PaymentModal';
 import { AuthContext } from '../context/AuthContext';
 import bookingService from '../services/bookingService';
 
-const Trains = () => {
-  const navigate = useNavigate();
+const Trains = ({ searchTerm }) => {
   const { auth } = useContext(AuthContext);
   const [trains, setTrains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSeats, setSelectedSeats] = useState(1);
   const [paymentBooking, setPaymentBooking] = useState(null);
   const [selectedTrain, setSelectedTrain] = useState(null);
+
+  const filteredTrains = useMemo(() => {
+    if (!searchTerm) return trains;
+    const lowerSearch = searchTerm.toLowerCase();
+    return trains.filter(t => 
+      t.source?.toLowerCase().includes(lowerSearch) ||
+      t.destination?.toLowerCase().includes(lowerSearch) ||
+      t.trainName?.toLowerCase().includes(lowerSearch) ||
+      t.trainNumber?.toString().includes(lowerSearch)
+    );
+  }, [trains, searchTerm]);
 
   useEffect(() => {
     fetchTrains();
@@ -65,42 +73,30 @@ const Trains = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900">
-        <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <p className="text-white text-xl">⏳ Loading trains...</p>
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <p className="text-slate-400 text-xl">⏳ Searching trains...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      <Navbar />
-
-      {/* Header */}
-      <div className="bg-gradient-to-b from-blue-900 to-slate-900 px-4 py-12">
-        <div className="max-w-7xl mx-auto">
-          <button
-            onClick={() => navigate('/')}
-            className="mb-6 px-4 py-2 rounded bg-slate-700 text-white font-semibold hover:bg-slate-600"
-          >
-            ← Back
-          </button>
-          <h1 className="text-5xl font-bold text-white mb-4">🚂 Book Train Tickets</h1>
-          <p className="text-xl text-slate-300">{trains.length} results found</p>
-        </div>
-      </div>
-
+    <div className="w-full">
       {/* Trains List */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        {trains.length === 0 ? (
-          <div className="text-center text-slate-400 py-12">
-            <p className="text-lg">No trains available</p>
+      <div className="max-w-7xl mx-auto px-4 pb-20">
+        <div className="mb-6 flex justify-between items-center text-slate-300">
+          <h2 className="text-2xl font-bold text-white">Available Trains</h2>
+          <p>{filteredTrains.length} results found</p>
+        </div>
+
+        {filteredTrains.length === 0 ? (
+          <div className="text-center text-slate-500 py-12 bg-slate-800/30 rounded-2xl border border-white/5 backdrop-blur-sm">
+            <p className="text-lg">{searchTerm ? `No trains found matching "${searchTerm}"` : 'No trains available'}</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {trains.map((train) => (
+            {filteredTrains.map((train) => (
               <div
                 key={train._id}
                 className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-600 transition-all hover:shadow-lg"

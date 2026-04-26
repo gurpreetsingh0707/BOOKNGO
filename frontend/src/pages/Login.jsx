@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import authService from '../services/authService';
 
@@ -38,7 +39,14 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
+        <button
+          onClick={() => navigate('/')}
+          className="absolute -left-12 top-0 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full border border-white/20 backdrop-blur-sm transition-all hidden md:flex items-center justify-center group shadow-lg"
+          title="Back to Home"
+        >
+          <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+        </button>
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Welcome Back</h1>
           <p className="text-gray-600">Login to your booking account</p>

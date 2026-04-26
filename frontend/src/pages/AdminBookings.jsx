@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Search } from 'lucide-react';
 import api from '../services/api';
 
 const AdminBookings = () => {
@@ -10,6 +11,17 @@ const AdminBookings = () => {
     const [filterType, setFilterType] = useState('');
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredBookings = useMemo(() => {
+        if (!searchTerm) return bookings;
+        const lowerSearch = searchTerm.toLowerCase();
+        return bookings.filter(b => 
+            b._id.toLowerCase().includes(lowerSearch) ||
+            b.totalPrice.toString().includes(lowerSearch) ||
+            b.user?.email?.toLowerCase().includes(lowerSearch)
+        );
+    }, [bookings, searchTerm]);
 
     useEffect(() => {
         fetchBookings();
@@ -49,14 +61,28 @@ const AdminBookings = () => {
     return (
         <div className="min-h-screen bg-slate-900">
             {/* Header */}
-            <div className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-white">📋 Manage Bookings</h1>
-                <button
-                    onClick={() => navigate('/admin')}
-                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded font-semibold"
-                >
-                    ← Back
-                </button>
+            <div className="bg-slate-800 border-b border-slate-700 px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/admin')}
+                        className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-full transition-all"
+                        title="Back to Dashboard"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <h1 className="text-3xl font-bold text-white">Manage Bookings</h1>
+                </div>
+
+                <div className="relative w-full md:w-96 group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-white transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Search by ID or Amount..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-700 text-white pl-12 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-500"
+                    />
+                </div>
             </div>
 
             {/* Filters */}
@@ -116,7 +142,7 @@ const AdminBookings = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {bookings.map((booking) => (
+                                    {filteredBookings.map((booking) => (
                                         <tr key={booking._id} className="border-b border-slate-700 hover:bg-slate-700">
                                             <td className="py-4 px-6 text-white text-sm font-mono">{booking._id.slice(-6)}</td>
                                             <td className="py-4 px-6 text-slate-300 capitalize">{booking.bookingType}</td>

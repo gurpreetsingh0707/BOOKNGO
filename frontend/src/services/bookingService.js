@@ -6,8 +6,10 @@ const bookingService = {
     return api.post('/bookings/movie', movieData);
   },
 
-  getAllMovies: () => {
-    return api.get('/movies');
+  getAllMovies: (category) => {
+    let url = '/movies';
+    if (category) url += `?category=${category}`;
+    return api.get(url);
   },
 
   // Train Bookings

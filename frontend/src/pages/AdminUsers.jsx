@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Search } from 'lucide-react';
 import api from '../services/api';
 
 const AdminUsers = () => {
@@ -10,6 +11,17 @@ const AdminUsers = () => {
     const [userDetails, setUserDetails] = useState(null);
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredUsers = useMemo(() => {
+        if (!searchTerm) return users;
+        const lowerSearch = searchTerm.toLowerCase();
+        return users.filter(u => 
+            u.firstName?.toLowerCase().includes(lowerSearch) ||
+            u.lastName?.toLowerCase().includes(lowerSearch) ||
+            u.email?.toLowerCase().includes(lowerSearch)
+        );
+    }, [users, searchTerm]);
 
     useEffect(() => {
         fetchUsers();
@@ -56,14 +68,28 @@ const AdminUsers = () => {
     return (
         <div className="min-h-screen bg-slate-900">
             {/* Header */}
-            <div className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-white">👥 Manage Users</h1>
-                <button
-                    onClick={() => navigate('/admin')}
-                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded font-semibold"
-                >
-                    ← Back
-                </button>
+            <div className="bg-slate-800 border-b border-slate-700 px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/admin')}
+                        className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-full transition-all"
+                        title="Back to Dashboard"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <h1 className="text-3xl font-bold text-white">Manage Users</h1>
+                </div>
+
+                <div className="relative w-full md:w-96 group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-white transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Search users by name or email..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-700 text-white pl-12 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-500"
+                    />
+                </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -76,7 +102,7 @@ const AdminUsers = () => {
                     ) : (
                         <>
                             <div className="space-y-3">
-                                {users.map((user) => (
+                                {filteredUsers.map((user) => (
                                     <div
                                         key={user._id}
                                         onClick={() => fetchUserDetails(user._id)}

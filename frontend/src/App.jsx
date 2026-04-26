@@ -6,9 +6,8 @@ import { AuthContext } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Movies from './pages/Movies';
-import Trains from './pages/Trains';
-import Buses from './pages/Buses';
+import Shows from './pages/Shows';
+import Travel from './pages/Travel';
 import Hotels from './pages/Hotels';
 import BookingHistory from './pages/BookingHistory';
 import AdminDashboard from './pages/AdminDashboard';
@@ -27,9 +26,9 @@ const AnimatedRoutes = ({ auth }) => {
 
         {/* Protected Routes */}
         <Route path="/" element={auth ? <PageTransition><Home /></PageTransition> : <Navigate to="/login" />} />
-        <Route path="/movies" element={auth ? <PageTransition><Movies /></PageTransition> : <Navigate to="/login" />} />
-        <Route path="/trains" element={auth ? <PageTransition><Trains /></PageTransition> : <Navigate to="/login" />} />
-        <Route path="/buses" element={auth ? <PageTransition><Buses /></PageTransition> : <Navigate to="/login" />} />
+        <Route path="/shows" element={auth ? <PageTransition><Shows /></PageTransition> : <Navigate to="/login" />} />
+        <Route path="/movies" element={<Navigate to="/shows" />} />
+        <Route path="/travel" element={auth ? <PageTransition><Travel /></PageTransition> : <Navigate to="/login" />} />
         <Route path="/hotels" element={auth ? <PageTransition><Hotels /></PageTransition> : <Navigate to="/login" />} />
         <Route path="/bookings" element={auth ? <PageTransition><BookingHistory /></PageTransition> : <Navigate to="/login" />} />
 
