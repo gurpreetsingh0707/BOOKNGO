@@ -16,7 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/BOOKNGO';
+// Trim the URI in case there are accidental spaces in Render environment variables
+const MONGODB_URI = (process.env.MONGODB_URI || 'mongodb://localhost:27017/BOOKNGO').trim();
+
 console.log('📡 Attempting to connect to MongoDB...');
 
 mongoose.connect(MONGODB_URI)
@@ -24,12 +26,15 @@ mongoose.connect(MONGODB_URI)
   .catch(err => {
     console.error('❌ MongoDB Connection Error:');
     console.error('Message:', err.message);
+    if (err.message.includes('Invalid scheme')) {
+      console.error('👉 TIP: Your MONGODB_URI on Render might be empty or missing "mongodb://" prefix.');
+    }
   });
 
-// Routes - Using exact filenames from directory listing to avoid Linux case-sensitivity issues
+// Routes - Standardizing to match Git case-sensitivity (CamelCase)
 try {
   console.log('🛣️ Loading routes...');
-  app.use('/api/auth', require('./routes/authroutes'));
+  app.use('/api/auth', require('./routes/authRoutes'));
   app.use('/api/bookings', require('./routes/bookingRoutes'));
   app.use('/api/buses', require('./routes/busRoutes'));
   app.use('/api/hotels', require('./routes/hotelRoutes'));
@@ -39,14 +44,13 @@ try {
   app.use('/api/search', require('./routes/searchRoutes'));
   app.use('/api/users', require('./routes/userRoutes'));
   app.use('/api/service-types', require('./routes/serviceTypeRoutes'));
-  app.use('/api/transactions', require('./routes/transcationRoutes'));
+  app.use('/api/transactions', require('./routes/transactionRoutes'));
   app.use('/api/payments', require('./routes/paymentRoutes'));
   app.use('/api/admin', require('./routes/adminRoutes'));
   console.log('✅ All routes loaded successfully');
 } catch (error) {
   console.error('❌ Error loading routes:', error.message);
   console.error('Stack:', error.stack);
-  // Don't exit here, let the app try to start so we can see the logs on Render
 }
 
 // 404 Handler
@@ -64,5 +68,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is officially listening on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
