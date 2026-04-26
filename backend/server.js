@@ -16,22 +16,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // MongoDB Connection
-// Trim the URI in case there are accidental spaces in Render environment variables
 const MONGODB_URI = (process.env.MONGODB_URI || 'mongodb://localhost:27017/BOOKNGO').trim();
 
-console.log('📡 Attempting to connect to MongoDB...');
+console.log('📡 Attempting to connect to MongoDB (IPv4 forced)...');
 
-mongoose.connect(MONGODB_URI)
+// Force IPv4 to bypass common DNS resolution issues on local machines
+mongoose.connect(MONGODB_URI, {
+  family: 4 
+})
   .then(() => console.log('✅ MongoDB Connected Successfully'))
   .catch(err => {
     console.error('❌ MongoDB Connection Error:');
     console.error('Message:', err.message);
-    if (err.message.includes('Invalid scheme')) {
-      console.error('👉 TIP: Your MONGODB_URI on Render might be empty or missing "mongodb://" prefix.');
+    if (err.message.includes('ECONNREFUSED')) {
+      console.error('👉 TIP: Your network is blocking MongoDB DNS. Try switching to a Mobile Hotspot or change your connection string to the "Standard" format in Atlas.');
     }
   });
 
-// Routes - Standardizing to match Git case-sensitivity (CamelCase)
+// Routes
 try {
   console.log('🛣️ Loading routes...');
   app.use('/api/auth', require('./routes/authRoutes'));
@@ -50,22 +52,17 @@ try {
   console.log('✅ All routes loaded successfully');
 } catch (error) {
   console.error('❌ Error loading routes:', error.message);
-  console.error('Stack:', error.stack);
 }
 
-// 404 Handler
-app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
-});
-
-// Error Handler
+// 404 & Error Handlers
+app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));
 app.use((err, req, res, next) => {
-  console.error('💥 Global Error Handler:', err);
+  console.error('💥 Global Error:', err);
   res.status(500).json({ success: false, message: err.message || 'Server Error' });
 });
 
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is officially listening on port ${PORT}`);
+  console.log(`🚀 Server listening on port ${PORT}`);
 });
