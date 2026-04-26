@@ -38,6 +38,11 @@ const movieSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  category: {
+    type: String,
+    enum: ['movie', 'live_show'],
+    default: 'movie'
   }
 }, { timestamps: true });
 

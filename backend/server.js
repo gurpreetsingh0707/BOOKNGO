@@ -12,9 +12,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/booking-platform')
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.log('❌ MongoDB Error:', err));
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/BOOKNGO';
+
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ MongoDB Connected Successfully'))
+  .catch(err => {
+    console.error('❌ MongoDB Connection Error:');
+    console.error('Message:', err.message);
+    if (err.message.includes('ECONNREFUSED')) {
+      console.error('👉 TIP: Ensure your database server is running or check your MONGODB_URI.');
+    }
+  });
 
 // Routes
 app.use('/api/auth', require('./routes/authroutes'));
@@ -30,6 +38,7 @@ app.use('/api/service-types', require('./routes/serviceTypeRoutes'));
 app.use('/api/transactions', require('./routes/transcationRoutes'));
 app.use('/api/payments', require('./routes/paymentRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });

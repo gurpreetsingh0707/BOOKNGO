@@ -4,7 +4,7 @@
   "description": "BOOKNGO - Multi-service booking platform",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node src/backend/server.js",
     "dev": "nodemon server.js",
     "seed": "node seed/seedDatabase.js"
   },

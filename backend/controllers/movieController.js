@@ -3,10 +3,14 @@ const Movie = require('../models/Movie');
 // GET all movies
 exports.getAllMovies = async (req, res) => {
   try {
-    const movies = await Movie.find({ isActive: true });
+    const filter = { isActive: true };
+    if (req.query.category) {
+      filter.category = req.query.category;
+    }
+    const movies = await Movie.find(filter);
     res.status(200).json({
       success: true,
-      message: 'Movies fetched successfully',
+      message: 'Items fetched successfully',
       data: movies,
       count: movies.length
     });
@@ -45,7 +49,7 @@ exports.getMovieById = async (req, res) => {
 // CREATE new movie (Admin only)
 exports.createMovie = async (req, res) => {
   try {
-    const { title, description, genre, language, duration, releaseDate, price, director, cast, image } = req.body;
+    const { title, description, genre, language, duration, releaseDate, price, director, cast, image, category } = req.body;
 
     // Validation
     if (!title || !language || !price) {
@@ -75,7 +79,8 @@ exports.createMovie = async (req, res) => {
       director,
       cast: Array.isArray(cast) ? cast : [cast],
       image,
-      isActive: true
+      isActive: true,
+      category: category || 'movie'
     });
 
     const savedMovie = await newMovie.save();
