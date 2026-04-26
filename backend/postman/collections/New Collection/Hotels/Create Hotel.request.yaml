@@ -1,0 +1,26 @@
+$kind: http-request
+name: Create Hotel
+url: '{{baseUrl}}/api/hotels'
+method: POST
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Test Hotel",
+      "city": "Mumbai",
+      "address": "123 Test Street",
+      "rating": 4.5,
+      "pricePerNight": 5000,
+      "totalRooms": 100,
+      "roomType": "Deluxe",
+      "category": "5-star"
+    }
+order: 4000

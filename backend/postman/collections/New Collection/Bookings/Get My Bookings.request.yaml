@@ -1,0 +1,21 @@
+$kind: http-request
+name: Get My Bookings
+url: '{{baseUrl}}/api/bookings/my'
+method: GET
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const res = pm.response.json();
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Response is an array", function () {
+          pm.expect(res).to.be.an("array");
+      });
+order: 2000

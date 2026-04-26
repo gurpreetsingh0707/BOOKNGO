@@ -4,25 +4,46 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// Movie Routes
+// =============================================
+// Listing endpoints (called by frontend pages)
+// =============================================
+router.get('/trains', bookingController.listTrains);
+router.get('/buses', bookingController.listBuses);
+router.get('/hotels', bookingController.listHotels);
+router.get('/flights', bookingController.listFlights);
+
+// =============================================
+// Service-specific booking endpoints
+// =============================================
 router.post('/movie', auth, bookingController.bookMovie);
-router.get('/movies', bookingController.getAllMovies);
-
-// Train Routes
 router.post('/train', auth, bookingController.bookTrain);
-router.get('/trains', bookingController.getAllTrains);
-
-// Bus Routes
 router.post('/bus', auth, bookingController.bookBus);
-router.get('/buses', bookingController.getAllBuses);
-
-// Hotel Routes
 router.post('/hotel', auth, bookingController.bookHotel);
-router.get('/hotels', bookingController.getAllHotels);
+router.post('/flight', auth, bookingController.bookFlight);
 
-// User Bookings
+// =============================================
+// Generic booking CRUD
+// =============================================
+
+// Create a new booking (generic)
+router.post('/', auth, bookingController.createBooking);
+
+// Get all bookings (admin)
+router.get('/', bookingController.getAllBookings);
+
+// Get user's bookings
 router.get('/user', auth, bookingController.getUserBookings);
-router.get('/:bookingId', auth, bookingController.getBooking);
+
+// Get specific booking by ID
+router.get('/:bookingId', auth, bookingController.getBookingById);
+
+// Update booking
+router.put('/:bookingId', auth, bookingController.updateBooking);
+
+// Cancel booking
 router.delete('/:bookingId', auth, bookingController.cancelBooking);
+
+// Confirm booking (payment success)
+router.post('/:bookingId/confirm', auth, bookingController.confirmBooking);
 
 module.exports = router;

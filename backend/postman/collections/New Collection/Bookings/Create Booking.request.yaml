@@ -1,0 +1,40 @@
+$kind: http-request
+name: Create Booking
+url: '{{baseUrl}}/api/bookings'
+method: POST
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "serviceType": "movie",
+      "serviceId": "{{movieId}}",
+      "seats": 2,
+      "totalAmount": 400
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const res = pm.response.json();
+      pm.test("Status code is 201", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.test("Booking created with ID", function () {
+          pm.expect(res).to.have.property("_id");
+      });
+      pm.test("Booking has correct serviceType", function () {
+          pm.expect(res.serviceType).to.eql("movie");
+      });
+      if (res._id) {
+          pm.environment.set("bookingId", res._id);
+          console.log("bookingId saved: " + res._id);
+      }
+order: 1000

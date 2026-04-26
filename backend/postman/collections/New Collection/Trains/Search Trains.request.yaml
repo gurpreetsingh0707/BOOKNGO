@@ -1,0 +1,5 @@
+$kind: http-request
+name: Search Trains
+url: '{{baseUrl}}/api/trains/search?from=Delhi&to=Mumbai'
+method: GET
+order: 3000

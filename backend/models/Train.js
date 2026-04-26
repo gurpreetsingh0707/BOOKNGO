@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const trainSchema = new mongoose.Schema({
-  name: {
+  trainName: {
     type: String,
     required: true,
     unique: true
@@ -11,11 +11,11 @@ const trainSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  from: {
+  source: {
     type: String,
     required: true
   },
-  to: {
+  destination: {
     type: String,
     required: true
   },
@@ -34,7 +34,7 @@ const trainSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  price: {
+  pricePerSeat: {
     type: Number,
     required: true
   },

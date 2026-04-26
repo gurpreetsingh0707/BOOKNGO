@@ -1,0 +1,10 @@
+$kind: http-request
+name: Delete Movie
+url: '{{baseUrl}}/api/movies/{{movieId}}'
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+order: 7000

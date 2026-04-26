@@ -7,7 +7,7 @@ const bookingService = {
   },
 
   getAllMovies: () => {
-    return api.get('/bookings/movies');
+    return api.get('/movies');
   },
 
   // Train Bookings
@@ -46,6 +46,20 @@ const bookingService = {
   getAllHotels: (city) => {
     let url = '/bookings/hotels';
     if (city) url += `?city=${city}`;
+    return api.get(url);
+  },
+
+  // Flight Bookings
+  bookFlight: (flightData) => {
+    return api.post('/bookings/flight', flightData);
+  },
+
+  getAllFlights: (from, to) => {
+    let url = '/bookings/flights';
+    const params = [];
+    if (from) params.push(`from=${from}`);
+    if (to) params.push(`to=${to}`);
+    if (params.length > 0) url += '?' + params.join('&');
     return api.get(url);
   },
 

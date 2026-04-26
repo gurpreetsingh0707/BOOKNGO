@@ -1,0 +1,10 @@
+$kind: http-request
+name: Delete Bus
+url: '{{baseUrl}}/api/buses/{{busId}}'
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+order: 6000

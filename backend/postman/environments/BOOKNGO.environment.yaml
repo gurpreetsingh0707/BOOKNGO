@@ -1,0 +1,24 @@
+$kind: environment
+name: BOOKNGO
+variables:
+  - key: baseUrl
+    value: 'http://localhost:5000'
+    enabled: true
+  - key: token
+    value: ''
+    enabled: true
+  - key: movieId
+    value: ''
+    enabled: true
+  - key: trainId
+    value: ''
+    enabled: true
+  - key: hotelId
+    value: ''
+    enabled: true
+  - key: busId
+    value: ''
+    enabled: true
+  - key: bookingId
+    value: ''
+    enabled: true

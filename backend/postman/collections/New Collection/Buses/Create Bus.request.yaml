@@ -1,0 +1,28 @@
+$kind: http-request
+name: Create Bus
+url: '{{baseUrl}}/api/buses'
+method: POST
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Test Volvo",
+      "busNumber": "DL-01-AB-1234",
+      "from": "Delhi",
+      "to": "Agra",
+      "departureTime": "10:00 PM",
+      "arrivalTime": "04:00 AM",
+      "duration": "6h",
+      "totalSeats": 50,
+      "price": 300,
+      "busType": "AC Sleeper"
+    }
+order: 4000

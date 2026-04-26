@@ -1,0 +1,34 @@
+$kind: http-request
+name: Login user
+url: '{{baseUrl}}/api/auth/login'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "testuser@example.com",
+      "password": "Test@1234"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Auto-capture JWT token after login
+      const res = pm.response.json();
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Response has token", function () {
+          pm.expect(res).to.have.property("token");
+      });
+      if (res.token) {
+          pm.environment.set("token", res.token);
+          console.log("Token saved to environment variable 'token'");
+      }
+      pm.test("Response has user object", function () {
+          pm.expect(res).to.have.property("user");
+      });
+order: 2000

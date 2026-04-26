@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Movie by ID
+url: '{{baseUrl}}/api/movies/{{movieId}}'
+method: GET
+order: 2000

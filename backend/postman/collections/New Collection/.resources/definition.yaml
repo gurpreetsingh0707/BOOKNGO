@@ -1,2 +1,17 @@
 $kind: collection
 name: New Collection
+variables:
+  - key: baseUrl
+    value: 'http://localhost:5000'
+  - key: token
+    value: ''
+  - key: movieId
+    value: ''
+  - key: trainId
+    value: ''
+  - key: hotelId
+    value: ''
+  - key: busId
+    value: ''
+  - key: bookingId
+    value: ''

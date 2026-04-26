@@ -1,0 +1,17 @@
+$kind: http-request
+name: Update Hotel
+url: '{{baseUrl}}/api/hotels/{{hotelId}}'
+method: PUT
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"pricePerNight": 5500}
+order: 5000

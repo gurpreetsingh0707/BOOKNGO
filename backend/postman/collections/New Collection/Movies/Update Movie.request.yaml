@@ -1,0 +1,17 @@
+$kind: http-request
+name: Update Movie
+url: '{{baseUrl}}/api/movies/{{movieId}}'
+method: PUT
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"price": 250}
+order: 6000

@@ -8,7 +8,7 @@ const bookingSchema = new mongoose.Schema({
   },
   bookingType: {
     type: String,
-    enum: ['movie', 'train', 'bus', 'hotel'],
+    enum: ['movie', 'train', 'bus', 'hotel', 'flight'],
     required: true
   },
   bookingDetails: {
@@ -21,25 +21,26 @@ const bookingSchema = new mongoose.Schema({
   },
   quantity: {
     type: Number,
-    default: 1
+    required: true
+  },
+  bookingStatus: {
+    type: String,
+    enum: ['pending', 'confirmed', 'cancelled'],
+    default: 'pending'
   },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'completed', 'failed', 'cancelled'],
+    enum: ['pending', 'completed', 'refunded', 'failed'],
     default: 'pending'
   },
   paymentId: String,
+  paymentDate: Date,
   orderId: String,
-  bookingStatus: {
-    type: String,
-    enum: ['confirmed', 'pending', 'cancelled', 'completed'],
-    default: 'pending'
-  },
+  travelDate: Date,
   bookingDate: {
     type: Date,
     default: Date.now
   },
-  travelDate: Date,
   cancelledDate: Date,
   notes: String
 }, { timestamps: true });

@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import authService from '../services/authService';
 
@@ -20,59 +21,188 @@ const Navbar = () => {
     { path: '/trains', label: 'Trains', icon: '🚂' },
     { path: '/buses', label: 'Buses', icon: '🚌' },
     { path: '/hotels', label: 'Hotels', icon: '🏨' },
+    { path: '/bookings', label: 'Bookings', icon: '📋' },
   ];
 
+  const adminLinks = [
+    { path: '/admin', label: 'Dashboard', icon: '📊' },
+    { path: '/admin/bookings', label: 'Bookings', icon: '📋' },
+    { path: '/admin/users', label: 'Users', icon: '👥' },
+    { path: '/admin/services', label: 'Services', icon: '🎫' },
+  ];
+
+  // Check if current route is admin
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/30 border-b border-white/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              ✈️ BOOKNGO
-            </div>
-          </Link>
+    <nav className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/10 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
+        <Link to="/" className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center gap-2 hover:scale-105 transition-transform">
+          <span className="text-2xl">✈️</span> BOOKNGO
+        </Link>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center space-y-0 space-x-2">
+          {isAdminRoute ? (
+            // Admin Navigation
+            <>
+              {adminLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`relative px-4 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${
+                      isActive ? 'text-white' : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="admin-nav-indicator"
+                        className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full"
+                        initial={false}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        style={{ zIndex: 0 }}
+                      />
+                    )}
+                    <span className="relative z-10">{link.icon} {link.label}</span>
+                  </Link>
+                );
+              })}
               <Link
-                key={link.path}
-                to={link.path}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                  location.pathname === link.path
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                    : 'text-gray-700 hover:bg-white/50'
-                }`}
+                to="/"
+                className="px-4 py-2 rounded-full font-medium transition-colors whitespace-nowrap text-slate-300 hover:bg-white/10"
               >
-                {link.icon} {link.label}
+                🏠 Back to App
               </Link>
-            ))}
-          </div>
+            </>
+          ) : (
+            // User Navigation
+            <>
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`relative px-4 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${
+                      isActive ? 'text-white' : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="user-nav-indicator"
+                        className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full"
+                        initial={false}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        style={{ zIndex: 0 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">{link.icon} {link.label}</span>
+                  </Link>
+                );
+              })}
+            </>
+          )}
+        </div>
 
-          {/* User Section */}
-          <div className="flex items-center space-x-4">
-            {auth && (
-              <>
-                <div className="hidden sm:flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold">
-                    {auth.user?.firstName?.[0]}
-                  </div>
-                  <div className="hidden md:block">
-                    <p className="text-sm font-semibold text-gray-800">{auth.user?.firstName}</p>
-                    <p className="text-xs text-gray-600">{auth.user?.email}</p>
-                  </div>
+        {/* User Section */}
+        <div className="flex items-center space-x-4">
+          {auth && (
+            <>
+              <div className="hidden sm:flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                  {auth.user?.firstName?.[0]}
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="bg-gradient-to-r from-red-500 to-pink-500 hover:shadow-lg text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+                <div className="hidden md:block">
+                  <p className="text-sm font-semibold text-white">{auth.user?.firstName}</p>
+                  <p className="text-xs text-slate-400">{auth.user?.email}</p>
+                </div>
+              </div>
+
+              {/* Admin Button */}
+              {!isAdminRoute && auth.user?.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-semibold transition-colors"
                 >
-                  Logout
-                </button>
-              </>
-            )}
-          </div>
+                  ⚙️ Admin
+                </Link>
+              )}
+
+              <button
+                onClick={handleLogout}
+                className="bg-white/10 hover:bg-red-500 hover:text-white border border-white/20 text-slate-300 px-6 py-2 rounded-full font-semibold transition-all"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Nav */}
+      <div className="md:hidden bg-slate-900/95 backdrop-blur-md px-4 py-3 overflow-x-auto border-t border-white/10">
+        <div className="flex space-x-2">
+          {isAdminRoute ? (
+            <>
+              {adminLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`relative px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
+                      isActive ? 'text-white' : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="mobile-admin-indicator"
+                        className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full"
+                        initial={false}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        style={{ zIndex: 0 }}
+                      />
+                    )}
+                    <span className="relative z-10">{link.icon}</span>
+                  </Link>
+                );
+              })}
+              <Link
+                to="/"
+                className="px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors text-slate-300 hover:bg-white/10"
+              >
+                🏠
+              </Link>
+            </>
+          ) : (
+            <>
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`relative px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
+                      isActive ? 'text-white' : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="mobile-user-indicator"
+                        className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full"
+                        initial={false}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        style={{ zIndex: 0 }}
+                      />
+                    )}
+                    <span className="relative z-10">{link.icon}</span>
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </div>
       </div>
     </nav>

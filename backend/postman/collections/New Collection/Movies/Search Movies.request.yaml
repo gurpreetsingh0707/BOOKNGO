@@ -1,0 +1,5 @@
+$kind: http-request
+name: Search Movies
+url: '{{baseUrl}}/api/movies/search?title=avengers'
+method: GET
+order: 3000

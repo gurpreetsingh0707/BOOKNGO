@@ -1,0 +1,5 @@
+$kind: http-request
+name: Search Hotels
+url: '{{baseUrl}}/api/hotels/search?city=Mumbai'
+method: GET
+order: 3000

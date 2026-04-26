@@ -1,0 +1,5 @@
+$kind: http-request
+name: Search Buses
+url: '{{baseUrl}}/api/buses/search?from=Delhi&to=Agra'
+method: GET
+order: 3000

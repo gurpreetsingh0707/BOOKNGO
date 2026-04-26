@@ -1,0 +1,10 @@
+$kind: http-request
+name: Cancel Booking
+url: '{{baseUrl}}/api/bookings/{{bookingId}}/cancel'
+method: PATCH
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+order: 4000

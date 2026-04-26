@@ -1,0 +1,17 @@
+$kind: http-request
+name: Update Train
+url: '{{baseUrl}}/api/trains/{{trainId}}'
+method: PUT
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"price": 800}
+order: 5000

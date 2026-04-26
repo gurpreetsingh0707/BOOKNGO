@@ -18,8 +18,8 @@ router.post('/register', async (req, res) => {
     }
     const user = new User({ firstName, lastName, email, phone, password });
     await user.save();
-    const token = jwt.sign({ _id: user._id, email: user.email }, 'secret', { expiresIn: '7d' });
-    res.status(201).json({ success: true, message: 'User registered', token, user: { _id: user._id, firstName, lastName, email, phone } });
+    const token = jwt.sign({ _id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET || 'your_secret_key', { expiresIn: '7d' });
+    res.status(201).json({ success: true, message: 'User registered', token, user: { _id: user._id, firstName, lastName, email, phone, role: user.role } });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -39,8 +39,8 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ _id: user._id, email: user.email }, 'secret', { expiresIn: '7d' });
-    res.status(200).json({ success: true, message: 'Login successful', token, user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, email, phone: user.phone } });
+    const token = jwt.sign({ _id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET || 'your_secret_key', { expiresIn: '7d' });
+    res.status(200).json({ success: true, message: 'Login successful', token, user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, email, phone: user.phone, role: user.role } });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -1,0 +1,10 @@
+$kind: http-request
+name: Get Booking by ID
+url: '{{baseUrl}}/api/bookings/{{bookingId}}'
+method: GET
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+order: 3000

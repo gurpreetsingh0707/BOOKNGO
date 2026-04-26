@@ -1,39 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import PaymentModal from '../components/PaymentModal';
+import { AuthContext } from '../context/AuthContext';
+import bookingService from '../services/bookingService';
 
 const Movies = () => {
   const navigate = useNavigate();
-  const [selectedMovies, setSelectedMovies] = useState([]);
+  const { auth } = useContext(AuthContext);
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSeats, setSelectedSeats] = useState(1);
+  const [paymentBooking, setPaymentBooking] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
-  const movies = [
-    { id: 1, title: 'Avengers: Endgame', price: 250, rating: 4.8, image: '🎬', language: 'English', duration: '3h 2m' },
-    { id: 2, title: 'Inception', price: 200, rating: 4.9, image: '🎬', language: 'English', duration: '2h 28m' },
-    { id: 3, title: 'The Dark Knight', price: 220, rating: 4.9, image: '🎬', language: 'English', duration: '2h 32m' },
-    { id: 4, title: 'Interstellar', price: 300, rating: 4.7, image: '🎬', language: 'English', duration: '2h 49m' },
-    { id: 5, title: 'The Matrix', price: 180, rating: 4.8, image: '🎬', language: 'English', duration: '2h 16m' },
-    { id: 6, title: 'Parasite', price: 220, rating: 4.9, image: '🎬', language: 'Korean', duration: '2h 12m' },
-    { id: 7, title: 'Dune', price: 280, rating: 4.6, image: '🎬', language: 'English', duration: '2h 35m' },
-    { id: 8, title: 'Oppenheimer', price: 300, rating: 4.8, image: '🎬', language: 'English', duration: '3h 0m' },
-  ];
+  useEffect(() => {
+    fetchMovies();
+  }, []);
 
-  const toggleSelect = (movieId) => {
-    setSelectedMovies(prev =>
-      prev.includes(movieId) ? prev.filter(id => id !== movieId) : [...prev, movieId]
-    );
-  };
-
-  const handleBooking = () => {
-    if (selectedMovies.length === 0) {
-      alert('Please select at least one movie!');
-      return;
+  const fetchMovies = async () => {
+    try {
+      setLoading(true);
+      const response = await bookingService.getAllMovies();
+      setMovies(response.data.data || response.data.movies || []);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to load movies');
+    } finally {
+      setLoading(false);
     }
-    const total = selectedMovies.reduce((sum, id) => {
-      const movie = movies.find(m => m.id === id);
-      return sum + (movie?.price || 0);
-    }, 0);
-    alert(`Booking ${selectedMovies.length} movie(s) for ₹${total}...`);
   };
+
+  const handleBook = async (movie) => {
+    try {
+      const bookingData = {
+        movieId: movie._id,
+        seats: selectedSeats,
+        travelDate: new Date()
+      };
+
+      const response = await bookingService.bookMovie(bookingData);
+      const booking = response.data.booking;
+
+      setPaymentBooking({
+        _id: booking._id,
+        bookingType: 'movie',
+        quantity: selectedSeats,
+        totalPrice: response.data.totalPrice,
+        userEmail: auth.user?.email
+      });
+
+      setSelectedMovie(null);
+    } catch (error) {
+      console.error('Booking error:', error);
+      alert(`❌ ${error.response?.data?.message || error.message}`);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    alert('✅ Booking confirmed! Check your booking history.');
+    fetchMovies();
+    setPaymentBooking(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex flex-col">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin text-5xl mb-4">🎬</div>
+            <p className="text-gray-600">Loading movies...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
@@ -41,88 +83,116 @@ const Movies = () => {
 
       {/* Header */}
       <div className="relative overflow-hidden py-16 sm:py-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-pink-600/20"></div>
-        <div className="max-w-6xl mx-auto">
+        <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-purple-600/20"></div>
+        <div className="relative max-w-6xl mx-auto px-4">
           <button
             onClick={() => navigate('/')}
             className="absolute left-6 top-6 bg-white text-gray-800 px-4 py-2 rounded-lg border border-white/30 hover:bg-white/90 transition"
           >
             ← Back
           </button>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 text-center">
             🎬 Book Movie Tickets
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl ">
-            Choose from the latest blockbusters and classics. Secure your seats now!
+          <p className="text-xl text-gray-600 max-w-2xl text-center mx-auto">
+            {movies.length} movies showing now. Grab your popcorn!
           </p>
         </div>
       </div>
 
-      {/* Movies Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {movies.map((movie) => (
-            <div
-              key={movie.id}
-              onClick={() => toggleSelect(movie.id)}
-              className={`group cursor-pointer relative overflow-hidden rounded-2xl transition-all duration-300 ${
-                selectedMovies.includes(movie.id) ? 'ring-2 ring-red-500 shadow-2xl' : 'hover:shadow-xl'
-              }`}
-            >
-              {/* Movie Card */}
-              <div className="bg-white h-full flex flex-col overflow-hidden">
-                {/* Image/Icon */}
-                <div className="bg-gradient-to-br from-red-500 to-pink-500 h-40 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform duration-300">
-                  {movie.image}
-                </div>
+      {/* Movies List */}
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        {movies.length === 0 ? (
+          <div className="text-center text-gray-500 py-12">No movies available</div>
+        ) : (
+          <div className="space-y-4">
+            {movies.map((movie) => {
+              const seatsLeft = movie.availableSeats;
 
-                {/* Content */}
-                <div className="p-4 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-2">{movie.title}</h3>
-                    <p className="text-xs text-gray-600 mb-3">{movie.language} • {movie.duration}</p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-2xl font-bold text-red-600">₹{movie.price}</span>
-                      <span className="text-yellow-500 font-semibold">⭐ {movie.rating}</span>
+              return (
+                <div key={movie._id} className="bg-white rounded-2xl p-6 border hover:shadow-xl transition">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+                    {/* Info */}
+                    <div className="md:col-span-2">
+                      <div className="flex items-center space-x-4">
+                        <div className="h-16 w-16 bg-red-100 rounded-xl flex items-center justify-center text-3xl shrink-0">
+                          🍿
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">{movie.title}</h3>
+                          <p className="text-sm text-gray-500">{movie.language}</p>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className={`w-full py-2 px-3 rounded-lg font-semibold transition-all duration-300 text-center ${
-                      selectedMovies.includes(movie.id)
-                        ? 'bg-red-600 text-white'
-                        : 'bg-red-50 text-red-600 group-hover:bg-red-100'
-                    }`}>
-                      {selectedMovies.includes(movie.id) ? '✓ Selected' : 'Select'}
+                    {/* Details */}
+                    <div className="text-center md:text-left">
+                      <p className="text-sm text-gray-500">Duration</p>
+                      <p className="font-semibold text-gray-800">{movie.duration}</p>
+                    </div>
+
+                    {/* Price & Rating */}
+                    <div className="text-center md:text-right">
+                      <p className="text-2xl font-bold text-red-600">
+                        ₹{movie.price?.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-yellow-500 font-semibold mt-1">⭐ {movie.rating}</p>
+                      <p className="text-xs text-gray-400 mt-1">{seatsLeft} seats left</p>
+                    </div>
+
+                    {/* Booking Section */}
+                    <div>
+                      {selectedMovie === movie._id ? (
+                        <div className="space-y-2">
+                          <input
+                            type="number"
+                            min="1"
+                            max={seatsLeft}
+                            value={selectedSeats}
+                            onChange={(e) => setSelectedSeats(parseInt(e.target.value))}
+                            className="w-full border px-3 py-2 rounded text-sm"
+                          />
+                          <p className="text-sm text-gray-600 text-center font-medium">
+                            Total: ₹{movie.price * selectedSeats}
+                          </p>
+                          <button
+                            onClick={() => handleBook(movie)}
+                            className="w-full bg-green-600 text-white py-2 rounded text-sm font-semibold"
+                          >
+                            Proceed to Payment
+                          </button>
+                          <button
+                            onClick={() => setSelectedMovie(null)}
+                            className="w-full bg-gray-300 py-2 rounded text-sm font-semibold"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedMovie(movie._id)}
+                          className="w-full bg-gradient-to-r from-red-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-transform hover:scale-105"
+                        >
+                          Book Now →
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Floating Checkout Bar */}
-        {selectedMovies.length > 0 && (
-          <div className="fixed bottom-6 left-0 right-0 flex justify-center z-40 px-4 animate-slide-up">
-            <div className="bg-gradient-to-r from-red-600 to-pink-600 rounded-full shadow-2xl px-8 py-4 flex items-center justify-between max-w-md w-full text-white">
-              <div>
-                <p className="text-sm font-medium">Selected: {selectedMovies.length} movie(s)</p>
-                <p className="text-2xl font-bold">
-                  ₹{selectedMovies.reduce((sum, id) => sum + (movies.find(m => m.id === id)?.price || 0), 0)}
-                </p>
-              </div>
-              <button
-                onClick={handleBooking}
-                className="bg-white text-red-600 font-bold px-6 py-2 rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-              >
-                Book →
-              </button>
-            </div>
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Payment Modal */}
+      {paymentBooking && (
+        <PaymentModal
+          booking={paymentBooking}
+          onClose={() => setPaymentBooking(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   );
 };

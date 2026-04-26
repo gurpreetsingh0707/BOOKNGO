@@ -1,0 +1,17 @@
+$kind: http-request
+name: Update Bus
+url: '{{baseUrl}}/api/buses/{{busId}}'
+method: PUT
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"price": 350}
+order: 5000

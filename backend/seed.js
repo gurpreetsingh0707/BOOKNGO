@@ -1,4 +1,4 @@
-// backend/seed.js - Run once to populate test data
+// backend/seed.js - Fixed field names
 
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -9,6 +9,7 @@ const Movie = require('./models/Movie');
 const Train = require('./models/Train');
 const Bus = require('./models/Bus');
 const Hotel = require('./models/Hotel');
+const Flight = require('./models/Flight');
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/booking-platform')
   .then(() => console.log('✅ MongoDB Connected'))
@@ -16,11 +17,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/booking-p
 
 const seedDatabase = async () => {
   try {
-    // Clear existing data
-    await Movie.deleteMany({});
-    await Train.deleteMany({});
-    await Bus.deleteMany({});
-    await Hotel.deleteMany({});
+    // Clear existing data and drop indexes
+    await Movie.collection.drop().catch(() => {});
+    await Train.collection.drop().catch(() => {});
+    await Bus.collection.drop().catch(() => {});
+    await Hotel.collection.drop().catch(() => {});
+    await Flight.collection.drop().catch(() => {});
 
     // Seed Movies
     const movies = await Movie.insertMany([
@@ -78,20 +80,20 @@ const seedDatabase = async () => {
       }
     ]);
 
-    // Seed Trains
+    // Seed Trains - FIXED FIELD NAMES
     const trains = await Train.insertMany([
       {
-        name: 'Rajdhani Express',
+        trainName: 'Rajdhani Express',
         trainNumber: '12951',
-        from: 'Delhi',
-        to: 'Mumbai',
+        source: 'Delhi',
+        destination: 'Mumbai',
         departureTime: '16:45',
         arrivalTime: '09:15',
         duration: '16h 30m',
         totalSeats: 500,
         availableSeats: 500,
         bookedSeats: 0,
-        price: 1500,
+        pricePerSeat: 1500,
         seatClass: 'ac3',
         rating: 4.6,
         facilities: ['WiFi', 'Food', 'AC'],
@@ -99,17 +101,17 @@ const seedDatabase = async () => {
         isActive: true
       },
       {
-        name: 'Shatabdi Express',
+        trainName: 'Shatabdi Express',
         trainNumber: '12002',
-        from: 'Delhi',
-        to: 'Chandigarh',
+        source: 'Delhi',
+        destination: 'Chandigarh',
         departureTime: '06:10',
         arrivalTime: '10:40',
         duration: '4h 30m',
         totalSeats: 500,
         availableSeats: 500,
         bookedSeats: 0,
-        price: 800,
+        pricePerSeat: 800,
         seatClass: 'ac2',
         rating: 4.7,
         facilities: ['WiFi', 'Food', 'AC'],
@@ -117,17 +119,17 @@ const seedDatabase = async () => {
         isActive: true
       },
       {
-        name: 'Garib Rath',
+        trainName: 'Garib Rath',
         trainNumber: '12620',
-        from: 'Delhi',
-        to: 'Chennai',
+        source: 'Delhi',
+        destination: 'Chennai',
         departureTime: '22:00',
         arrivalTime: '22:00',
         duration: '28h',
         totalSeats: 500,
         availableSeats: 500,
         bookedSeats: 0,
-        price: 1200,
+        pricePerSeat: 1200,
         seatClass: 'sleeper',
         rating: 4.5,
         facilities: ['Food', 'Sleeper'],
@@ -135,17 +137,17 @@ const seedDatabase = async () => {
         isActive: true
       },
       {
-        name: 'Premium Express',
+        trainName: 'Premium Express',
         trainNumber: '12707',
-        from: 'Mumbai',
-        to: 'Bangalore',
+        source: 'Mumbai',
+        destination: 'Bangalore',
         departureTime: '10:00',
         arrivalTime: '00:00',
         duration: '14h',
         totalSeats: 500,
         availableSeats: 500,
         bookedSeats: 0,
-        price: 2000,
+        pricePerSeat: 2000,
         seatClass: 'ac1',
         rating: 4.8,
         facilities: ['WiFi', 'Food', 'AC', 'Shower'],
@@ -314,10 +316,95 @@ const seedDatabase = async () => {
       }
     ]);
 
+    // Seed Flights
+    const flights = await Flight.insertMany([
+      {
+        flightName: 'IndiGo Express',
+        flightNumber: '6E-2001',
+        airline: 'IndiGo',
+        source: 'Delhi',
+        destination: 'Mumbai',
+        departureTime: '06:30',
+        arrivalTime: '08:45',
+        duration: '2h 15m',
+        totalSeats: 180,
+        availableSeats: 180,
+        bookedSeats: 0,
+        price: 4500,
+        classType: 'economy',
+        rating: 4.3,
+        amenities: ['Snacks', 'WiFi'],
+        stops: 0,
+        aircraft: 'Airbus A320',
+        isActive: true
+      },
+      {
+        flightName: 'Air India Royal',
+        flightNumber: 'AI-101',
+        airline: 'Air India',
+        source: 'Delhi',
+        destination: 'Bangalore',
+        departureTime: '10:00',
+        arrivalTime: '12:45',
+        duration: '2h 45m',
+        totalSeats: 180,
+        availableSeats: 180,
+        bookedSeats: 0,
+        price: 6500,
+        classType: 'business',
+        rating: 4.6,
+        amenities: ['Meal', 'WiFi', 'Entertainment', 'Lounge'],
+        stops: 0,
+        aircraft: 'Boeing 787',
+        isActive: true
+      },
+      {
+        flightName: 'SpiceJet Budget',
+        flightNumber: 'SG-8821',
+        airline: 'SpiceJet',
+        source: 'Mumbai',
+        destination: 'Goa',
+        departureTime: '14:00',
+        arrivalTime: '15:15',
+        duration: '1h 15m',
+        totalSeats: 180,
+        availableSeats: 180,
+        bookedSeats: 0,
+        price: 3200,
+        classType: 'economy',
+        rating: 4.1,
+        amenities: ['Snacks'],
+        stops: 0,
+        aircraft: 'Boeing 737',
+        isActive: true
+      },
+      {
+        flightName: 'Vistara Premium',
+        flightNumber: 'UK-945',
+        airline: 'Vistara',
+        source: 'Bangalore',
+        destination: 'Delhi',
+        departureTime: '19:30',
+        arrivalTime: '22:15',
+        duration: '2h 45m',
+        totalSeats: 180,
+        availableSeats: 180,
+        bookedSeats: 0,
+        price: 8500,
+        classType: 'premium_economy',
+        rating: 4.8,
+        amenities: ['Meal', 'WiFi', 'Entertainment', 'Priority Boarding'],
+        stops: 0,
+        aircraft: 'Airbus A321neo',
+        isActive: true
+      }
+    ]);
+
     console.log('✅ Movies seeded:', movies.length);
     console.log('✅ Trains seeded:', trains.length);
     console.log('✅ Buses seeded:', buses.length);
     console.log('✅ Hotels seeded:', hotels.length);
+    console.log('✅ Flights seeded:', flights.length);
     console.log('\n🎉 Database seeded successfully!');
 
     process.exit(0);

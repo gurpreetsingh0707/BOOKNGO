@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Bus by ID
+url: '{{baseUrl}}/api/buses/{{busId}}'
+method: GET
+order: 2000

@@ -1,0 +1,26 @@
+$kind: http-request
+name: Get All Buses
+url: '{{baseUrl}}/api/buses'
+method: GET
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const res = pm.response.json();
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Response is an array", function () {
+          pm.expect(res).to.be.an("array");
+      });
+      pm.test("Buses have required fields", function () {
+          if (res.length > 0) {
+              pm.expect(res[0]).to.have.property("_id");
+              pm.expect(res[0]).to.have.property("name");
+          }
+      });
+      if (res.length > 0) {
+          pm.environment.set("busId", res[0]._id);
+          console.log("busId saved: " + res[0]._id);
+      }
+order: 1000

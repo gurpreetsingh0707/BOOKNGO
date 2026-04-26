@@ -1,0 +1,28 @@
+$kind: http-request
+name: Create Train
+url: '{{baseUrl}}/api/trains'
+method: POST
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Test Express",
+      "trainNumber": "12345",
+      "from": "Delhi",
+      "to": "Mumbai",
+      "departureTime": "10:00 AM",
+      "arrivalTime": "08:00 PM",
+      "duration": "10h",
+      "totalSeats": 500,
+      "price": 750,
+      "seatClass": "Sleeper"
+    }
+order: 4000
