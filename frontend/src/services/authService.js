@@ -2,11 +2,11 @@ import api from './api';
 
 const authService = {
   register: (userData) => {
-    return api.post('/auth/Register', userData);
+    return api.post('/auth/register', userData);
   },
   
   login: (credentials) => {
-    return api.post('/auth/Login', credentials);
+    return api.post('/auth/login', credentials);
   },
   
   logout: () => {

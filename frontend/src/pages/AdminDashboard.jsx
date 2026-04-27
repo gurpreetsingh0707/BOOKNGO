@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 
 const AdminDashboard = () => {
@@ -19,7 +20,7 @@ const AdminDashboard = () => {
             setStats(response.data.stats);
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to load stats');
+            toast.error('Failed to load stats');
         } finally {
             setLoading(false);
         }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 const AdminServices = () => {
     const navigate = useNavigate();
@@ -34,7 +35,7 @@ const AdminServices = () => {
             setItems(response.data[activeTab] || response.data.movies || []);
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to load items');
+            toast.error('Failed to load items');
         } finally {
             setLoading(false);
         }
@@ -46,10 +47,10 @@ const AdminServices = () => {
         try {
             const endpoint = activeTab;
             await api.delete(`/admin/${endpoint}/${id}`);
-            alert('✅ Item deleted');
+            toast.success('✅ Item deleted successfully');
             fetchItems();
         } catch (error) {
-            alert(`❌ ${error.response?.data?.message}`);
+            toast.error(`❌ ${error.response?.data?.message || 'Failed to delete'}`);
         }
     };
 
@@ -64,12 +65,12 @@ const AdminServices = () => {
         e.preventDefault();
         try {
             await api.post(`/admin/${activeTab}`, formData);
-            alert('✅ Item added successfully');
+            toast.success('✨ Item added successfully');
             setIsAdding(false);
             setFormData({});
             fetchItems();
         } catch (error) {
-            alert(`❌ ${error.response?.data?.message || 'Failed to add item'}`);
+            toast.error(`❌ ${error.response?.data?.message || 'Failed to add item'}`);
         }
     };
 
@@ -78,12 +79,12 @@ const AdminServices = () => {
         try {
             const endpoint = activeTab;
             await api.patch(`/admin/${endpoint}/${editingItem._id}`, formData);
-            alert('✅ Item updated successfully');
+            toast.success('✏️ Item updated successfully');
             setEditingItem(null);
             setFormData({});
             fetchItems();
         } catch (error) {
-            alert(`❌ ${error.response?.data?.message || 'Failed to update item'}`);
+            toast.error(`❌ ${error.response?.data?.message || 'Failed to update item'}`);
         }
     };
 

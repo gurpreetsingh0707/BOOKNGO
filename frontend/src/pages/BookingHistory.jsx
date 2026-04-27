@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar';
 import bookingService from '../services/bookingService';
 
@@ -21,7 +22,7 @@ const BookingHistory = () => {
             setBookings(response.data.data || []);
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to load bookings');
+            toast.error('Failed to load bookings');
         } finally {
             setLoading(false);
         }
@@ -33,10 +34,10 @@ const BookingHistory = () => {
         try {
             setCancelling(bookingId);
             await bookingService.cancelBooking(bookingId);
-            alert('✅ Booking cancelled!');
+            toast.success('✅ Booking cancelled!');
             fetchBookings();
         } catch (error) {
-            alert(`❌ ${error.response?.data?.message || error.message}`);
+            toast.error(`❌ ${error.response?.data?.message || error.message}`);
         } finally {
             setCancelling(null);
         }

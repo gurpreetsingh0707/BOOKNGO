@@ -14,6 +14,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminBookings from './pages/AdminBookings';
 import AdminUsers from './pages/AdminUsers';
 import AdminServices from './pages/AdminServices';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AnimatedRoutes = ({ auth }) => {
   const location = useLocation();
@@ -50,13 +52,7 @@ const App = () => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     if (token && user) {
-      const parsedUser = JSON.parse(user);
-      // Auto-fix stale sessions by forcing the admin role locally since we upgraded all users
-      if (parsedUser.role !== 'admin') {
-        parsedUser.role = 'admin';
-        localStorage.setItem('user', JSON.stringify(parsedUser));
-      }
-      setAuth({ token, user: parsedUser });
+      setAuth({ token, user: JSON.parse(user) });
     }
     setLoading(false);
   }, []);
@@ -68,6 +64,18 @@ const App = () => {
       <Router>
         <AnimatedRoutes auth={auth} />
       </Router>
+      <ToastContainer 
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </AuthContext.Provider>
   );
 };

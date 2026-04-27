@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 
 const AdminUsers = () => {
@@ -35,7 +36,7 @@ const AdminUsers = () => {
             setPagination(response.data.pagination);
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to load users');
+            toast.error('Failed to load users');
         } finally {
             setLoading(false);
         }
@@ -47,7 +48,7 @@ const AdminUsers = () => {
             setUserDetails(response.data);
             setSelectedUser(userId);
         } catch (error) {
-            alert('Failed to load user details');
+            toast.error('Failed to load user details');
         }
     };
 
@@ -56,12 +57,12 @@ const AdminUsers = () => {
 
         try {
             await api.patch(`/admin/users/${userId}/deactivate`);
-            alert('✅ User deactivated');
+            toast.success('✅ User deactivated');
             fetchUsers();
             setSelectedUser(null);
             setUserDetails(null);
         } catch (error) {
-            alert(`❌ ${error.response?.data?.message}`);
+            toast.error(`❌ ${error.response?.data?.message || 'Failed to deactivate user'}`);
         }
     };
 

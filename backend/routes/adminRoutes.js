@@ -6,7 +6,7 @@ const router = express.Router();
 
 const User = require('../models/User');
 
-// Middleware to check admin
+// Middleware to check admin (Strictly for Owner account)
 const adminAuth = async (req, res, next) => {
     try {
         if (!req.user) {
@@ -14,8 +14,12 @@ const adminAuth = async (req, res, next) => {
         }
 
         const user = await User.findById(req.user._id);
-        if (!user || !['admin', 'super-admin'].includes(user.role)) {
-            return res.status(403).json({ success: false, message: 'Admin access required' });
+        
+        // STRICTOR CHECK: Only allow nargourav54@gmail.com
+        const OWNER_EMAIL = 'nargourav54@gmail.com';
+        
+        if (!user || user.email !== OWNER_EMAIL || !['admin', 'super-admin'].includes(user.role)) {
+            return res.status(403).json({ success: false, message: 'Access Denied: Owner account required' });
         }
         
         next();

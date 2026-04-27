@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
+import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar';
 import PaymentModal from '../components/PaymentModal';
 import { AuthContext } from '../context/AuthContext';
@@ -38,7 +39,7 @@ const Hotels = () => {
       setHotels(response.data.hotels || []);
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to load hotels');
+      toast.error('Failed to load hotels');
     } finally {
       setLoading(false);
     }
@@ -46,12 +47,12 @@ const Hotels = () => {
 
   const handleBook = async (hotel) => {
     if (!checkIn || !checkOut) {
-      alert('Please select check-in and check-out dates');
+      toast.warning('Please select check-in and check-out dates');
       return;
     }
 
     if (new Date(checkOut) <= new Date(checkIn)) {
-      alert('Check-out date must be after check-in date');
+      toast.warning('Check-out date must be after check-in date');
       return;
     }
 
@@ -82,12 +83,12 @@ const Hotels = () => {
       setSelectedHotel(null);
     } catch (error) {
       console.error('Booking error:', error);
-      alert(`❌ ${error.response?.data?.message || error.message}`);
+      toast.error(`❌ ${error.response?.data?.message || error.message}`);
     }
   };
 
   const handlePaymentSuccess = () => {
-    alert('✅ Booking confirmed! Check your booking history.');
+    toast.success('✅ Booking confirmed! Check your booking history.');
     fetchHotels();
     setPaymentBooking(null);
   };

@@ -3,11 +3,28 @@ const Movie = require('../models/Movie');
 // GET all movies
 exports.getAllMovies = async (req, res) => {
   try {
-    const filter = { isActive: true };
+    let filter = { isActive: true };
+    
     if (req.query.category) {
-      filter.category = req.query.category;
+      if (req.query.category === 'movie') {
+        // Inclusion logic for legacy data: 
+        // Show movies that are explicitly 'movie' OR have no category field at all
+        filter = {
+          isActive: true,
+          $or: [
+            { category: 'movie' },
+            { category: { $exists: false } },
+            { category: null },
+            { category: '' }
+          ]
+        };
+      } else {
+        filter.category = req.query.category;
+      }
     }
-    const movies = await Movie.find(filter);
+
+    const movies = await Movie.find(filter).sort({ createdAt: -1 });
+
     res.status(200).json({
       success: true,
       message: 'Items fetched successfully',
@@ -15,6 +32,7 @@ exports.getAllMovies = async (req, res) => {
       count: movies.length
     });
   } catch (error) {
+    console.error('Fetch error:', error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -26,23 +44,10 @@ exports.getAllMovies = async (req, res) => {
 exports.getMovieById = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
-    
-    if (!movie) {
-      return res.status(404).json({
-        success: false,
-        message: 'Movie not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: movie
-    });
+    if (!movie) return res.status(404).json({ success: false, message: 'Movie not found' });
+    res.status(200).json({ success: true, data: movie });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -50,23 +55,7 @@ exports.getMovieById = async (req, res) => {
 exports.createMovie = async (req, res) => {
   try {
     const { title, description, genre, language, duration, releaseDate, price, director, cast, image, category } = req.body;
-
-    // Validation
-    if (!title || !language || !price) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title, language, and price are required'
-      });
-    }
-
-    // Check if movie already exists
-    const existingMovie = await Movie.findOne({ title });
-    if (existingMovie) {
-      return res.status(409).json({
-        success: false,
-        message: 'Movie with this title already exists'
-      });
-    }
+    if (!title || !language || !price) return res.status(400).json({ success: false, message: 'Title, language, and price are required' });
 
     const newMovie = new Movie({
       title,
@@ -84,17 +73,9 @@ exports.createMovie = async (req, res) => {
     });
 
     const savedMovie = await newMovie.save();
-
-    res.status(201).json({
-      success: true,
-      message: 'Movie created successfully',
-      data: savedMovie
-    });
+    res.status(201).json({ success: true, message: 'Movie created successfully', data: savedMovie });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -102,100 +83,32 @@ exports.createMovie = async (req, res) => {
 exports.updateMovie = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
-
-    // Handle arrays
-    if (updateData.genre && !Array.isArray(updateData.genre)) {
-      updateData.genre = [updateData.genre];
-    }
-    if (updateData.cast && !Array.isArray(updateData.cast)) {
-      updateData.cast = [updateData.cast];
-    }
-
-    const updatedMovie = await Movie.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedMovie) {
-      return res.status(404).json({
-        success: false,
-        message: 'Movie not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Movie updated successfully',
-      data: updatedMovie
-    });
+    const updatedMovie = await Movie.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+    if (!updatedMovie) return res.status(404).json({ success: false, message: 'Movie not found' });
+    res.status(200).json({ success: true, message: 'Movie updated successfully', data: updatedMovie });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// DELETE movie (Soft delete - mark as inactive)
+// DELETE movie (Soft delete)
 exports.deleteMovie = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const deletedMovie = await Movie.findByIdAndUpdate(
-      id,
-      { isActive: false },
-      { new: true }
-    );
-
-    if (!deletedMovie) {
-      return res.status(404).json({
-        success: false,
-        message: 'Movie not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Movie deleted successfully',
-      data: deletedMovie
-    });
+    const deletedMovie = await Movie.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+    if (!deletedMovie) return res.status(404).json({ success: false, message: 'Movie not found' });
+    res.status(200).json({ success: true, message: 'Movie deleted successfully' });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 // Get movies by genre
 exports.getMoviesByGenre = async (req, res) => {
   try {
-    const { genre } = req.params;
-    
-    const movies = await Movie.find({
-      genre: genre,
-      isActive: true
-    });
-
-    if (!movies || movies.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: `No movies found for genre: ${genre}`
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: movies,
-      count: movies.length
-    });
+    const movies = await Movie.find({ genre: req.params.genre, isActive: true });
+    res.status(200).json({ success: true, data: movies, count: movies.length });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -203,33 +116,17 @@ exports.getMoviesByGenre = async (req, res) => {
 exports.searchMovies = async (req, res) => {
   try {
     const { query } = req.query;
-
-    if (!query) {
-      return res.status(400).json({
-        success: false,
-        message: 'Search query is required'
-      });
-    }
-
+    if (!query) return res.status(400).json({ success: false, message: 'Search query is required' });
     const movies = await Movie.find({
       $or: [
         { title: { $regex: query, $options: 'i' } },
-        { description: { $regex: query, $options: 'i' } },
-        { director: { $regex: query, $options: 'i' } }
+        { description: { $regex: query, $options: 'i' } }
       ],
       isActive: true
     });
-
-    res.status(200).json({
-      success: true,
-      data: movies,
-      count: movies.length
-    });
+    res.status(200).json({ success: true, data: movies, count: movies.length });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -238,44 +135,13 @@ exports.updateBookedSeats = async (req, res) => {
   try {
     const { id } = req.params;
     const { seatsToBook } = req.body;
-
-    if (!seatsToBook || seatsToBook <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Valid number of seats is required'
-      });
-    }
-
     const movie = await Movie.findById(id);
+    if (!movie) return res.status(404).json({ success: false, message: 'Movie not found' });
     
-    if (!movie) {
-      return res.status(404).json({
-        success: false,
-        message: 'Movie not found'
-      });
-    }
-
-    const availableSeats = movie.availableSeats - movie.bookedSeats;
-    
-    if (seatsToBook > availableSeats) {
-      return res.status(400).json({
-        success: false,
-        message: `Only ${availableSeats} seats available`
-      });
-    }
-
     movie.bookedSeats += seatsToBook;
-    const updatedMovie = await movie.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Seats booked successfully',
-      data: updatedMovie
-    });
+    await movie.save();
+    res.status(200).json({ success: true, message: 'Seats updated', data: movie });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };

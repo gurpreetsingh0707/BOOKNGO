@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 const PaymentModal = ({ booking, onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
@@ -45,7 +46,7 @@ const PaymentModal = ({ booking, onClose, onSuccess }) => {
                             });
 
                             if (verifyResponse.data.success) {
-                                alert('✅ Payment successful! Booking confirmed.');
+                                toast.success('✅ Payment successful! Booking confirmed.');
                                 onSuccess(verifyResponse.data.booking);
                                 onClose();
                             }

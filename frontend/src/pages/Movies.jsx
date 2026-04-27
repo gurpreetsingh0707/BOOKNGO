@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
+import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar';
 import PaymentModal from '../components/PaymentModal';
 import { AuthContext } from '../context/AuthContext';
@@ -15,10 +16,13 @@ const Movies = ({ category = 'movie', searchTerm = '' }) => {
   const [selectedMovie, setSelectedMovie] = useState(null);
 
   const filteredMovies = useMemo(() => {
-    return movies.filter(movie => 
-      movie.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      movie.language?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (!movies) return [];
+    const term = (searchTerm || '').toLowerCase();
+    return movies.filter(movie => {
+      const title = (movie.title || '').toLowerCase();
+      const language = (movie.language || '').toLowerCase();
+      return title.includes(term) || language.includes(term);
+    });
   }, [movies, searchTerm]);
 
   useEffect(() => {
@@ -28,11 +32,17 @@ const Movies = ({ category = 'movie', searchTerm = '' }) => {
   const fetchMovies = async () => {
     try {
       setLoading(true);
+      console.log('📡 Fetching from database for:', category);
+      
       const response = await bookingService.getAllMovies(category);
-      setMovies(response.data.data || response.data.movies || []);
+      
+      // Extract data from response.data (Axios structure)
+      const data = response.data.data || response.data.movies || response.data || [];
+      
+      console.log('📦 Data received:', data);
+      setMovies(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to load movies');
+      console.error('❌ Database Fetch Error:', error.message);
     } finally {
       setLoading(false);
     }
@@ -45,7 +55,6 @@ const Movies = ({ category = 'movie', searchTerm = '' }) => {
         seats: selectedSeats,
         travelDate: new Date()
       };
-
       const response = await bookingService.bookMovie(bookingData);
       const booking = response.data.booking;
 
@@ -54,132 +63,126 @@ const Movies = ({ category = 'movie', searchTerm = '' }) => {
         bookingType: 'movie',
         quantity: selectedSeats,
         totalPrice: response.data.totalPrice,
-        userEmail: auth.user?.email
+        userEmail: auth?.user?.email
       });
-
       setSelectedMovie(null);
     } catch (error) {
-      console.error('Booking error:', error);
-      alert(`❌ ${error.response?.data?.message || error.message}`);
+      toast.error(`❌ Booking Failed: ${error.response?.data?.message || error.message}`);
     }
-  };
-
-  const handlePaymentSuccess = () => {
-    alert('✅ Booking confirmed! Check your booking history.');
-    fetchMovies();
-    setPaymentBooking(null);
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-center">
-          <div className="animate-spin text-5xl mb-4">{category === 'movie' ? '🎬' : '🎭'}</div>
-          <p className="text-gray-600">Loading {category === 'movie' ? 'movies' : 'live shows'}...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-500 font-medium">Fetching database data...</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full">
-      {/* Movies List */}
-      <div className="max-w-6xl mx-auto px-4 pb-20">
-        <div className="mb-6 flex justify-between items-center text-slate-700">
-          <h2 className="text-2xl font-bold">{category === 'movie' ? 'Available Movies' : 'Live Performances'}</h2>
-          <p>{filteredMovies.length} results found</p>
+    <div className="w-full max-w-6xl mx-auto px-4 pb-20">
+      <div className="mb-8 flex justify-between items-center">
+        <h2 className="text-3xl font-black text-slate-900">
+          {category === 'movie' ? '🎬 Available Movies' : '🎭 Live Performances'}
+        </h2>
+        <div className="bg-slate-100 px-4 py-2 rounded-2xl text-sm font-bold text-slate-600">
+          {filteredMovies.length} found
         </div>
-        {filteredMovies.length === 0 ? (
-          <div className="text-center text-gray-500 py-12 bg-white/50 backdrop-blur-sm rounded-2xl border border-white/20 shadow-sm">
-            No movies match your search.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredMovies.map((movie) => {
-              const seatsLeft = movie.availableSeats;
+      </div>
 
-              return (
-                <div key={movie._id} className="bg-white rounded-2xl p-6 border hover:shadow-xl transition">
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-                    {/* Info */}
-                    <div className="md:col-span-2">
-                      <div className="flex items-center space-x-4">
-                        <div className="h-16 w-16 bg-red-100 rounded-xl flex items-center justify-center text-3xl shrink-0">
-                          {movie.category === 'live_show' ? '🎭' : '🍿'}
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900">{movie.title}</h3>
-                          <p className="text-sm text-gray-500">{movie.language}</p>
-                        </div>
-                      </div>
-                    </div>
+      {filteredMovies.length === 0 ? (
+        <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl p-20 text-center">
+          <div className="text-6xl mb-6">🏜️</div>
+          <h3 className="text-2xl font-bold text-slate-800 mb-2">No shows found</h3>
+          <p className="text-slate-500 mb-8">We couldn't load any data for the "{category}" category.</p>
+          <button 
+            onClick={fetchMovies}
+            className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-bold hover:bg-slate-800 transition"
+          >
+            Retry Database Connection
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6">
+          {filteredMovies.map((movie) => {
+            const seatsLeft = (movie.availableSeats || 100) - (movie.bookedSeats || 0);
 
-                    {/* Details */}
-                    <div className="text-center md:text-left">
-                      <p className="text-sm text-gray-500">Duration</p>
-                      <p className="font-semibold text-gray-800">{movie.duration}</p>
-                    </div>
-
-                    {/* Price & Rating */}
-                    <div className="text-center md:text-right">
-                      <p className="text-2xl font-bold text-red-600">
-                        ₹{movie.price?.toLocaleString()}
-                      </p>
-                      <p className="text-sm text-yellow-500 font-semibold mt-1">⭐ {movie.rating}</p>
-                      <p className="text-xs text-gray-400 mt-1">{seatsLeft} seats left</p>
-                    </div>
-
-                    {/* Booking Section */}
-                    <div>
-                      {selectedMovie === movie._id ? (
-                        <div className="space-y-2">
-                          <input
-                            type="number"
-                            min="1"
-                            max={seatsLeft}
-                            value={selectedSeats}
-                            onChange={(e) => setSelectedSeats(parseInt(e.target.value))}
-                            className="w-full border px-3 py-2 rounded text-sm"
-                          />
-                          <p className="text-sm text-gray-600 text-center font-medium">
-                            Total: ₹{movie.price * selectedSeats}
-                          </p>
-                          <button
-                            onClick={() => handleBook(movie)}
-                            className="w-full bg-green-600 text-white py-2 rounded text-sm font-semibold"
-                          >
-                            Proceed to Payment
-                          </button>
-                          <button
-                            onClick={() => setSelectedMovie(null)}
-                            className="w-full bg-gray-300 py-2 rounded text-sm font-semibold"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setSelectedMovie(movie._id)}
-                          className="w-full bg-gradient-to-r from-red-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-transform hover:scale-105"
-                        >
-                          Book Now →
-                        </button>
-                      )}
+            return (
+            <div key={movie._id} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 group">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div className="flex items-center gap-6 flex-1">
+                  <div className="text-5xl bg-slate-50 w-24 h-24 flex items-center justify-center rounded-3xl border border-slate-100 group-hover:scale-105 transition-transform">
+                    {movie.category === 'live_show' ? '🎭' : '🍿'}
+                  </div>
+                  <div>
+                    <h3 className="text-3xl font-black text-slate-900 mb-1">{movie.title || 'Untitled'}</h3>
+                    <div className="flex gap-2">
+                      <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold uppercase">{movie.language || 'English'}</span>
+                      <span className="bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">⭐ {movie.rating || '8.5'}</span>
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
-      {/* Payment Modal */}
+                <div className="flex flex-col items-center md:items-end gap-2">
+                  <div className="text-center md:text-right">
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Per Ticket</p>
+                    <p className="text-4xl font-black text-slate-900">₹{movie.price || 0}</p>
+                    <p className="text-xs text-green-500 font-bold mt-1 uppercase tracking-tighter">{seatsLeft} seats remaining</p>
+                  </div>
+                  
+                  {selectedMovie === movie._id ? (
+                    <div className="space-y-2 w-full min-w-[180px] mt-2">
+                      <input
+                        type="number"
+                        min="1"
+                        max={seatsLeft}
+                        value={selectedSeats}
+                        onChange={(e) => setSelectedSeats(parseInt(e.target.value) || 1)}
+                        className="w-full border border-slate-200 bg-slate-50 text-slate-900 px-3 py-2 rounded-xl focus:outline-none focus:border-blue-500 text-sm"
+                        placeholder="Seats"
+                      />
+                      <p className="text-sm text-slate-600 text-center font-semibold">
+                        Total: ₹{(movie.price || 0) * selectedSeats}
+                      </p>
+                      <button 
+                        onClick={() => handleBook(movie)}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm"
+                      >
+                        💳 Pay Now
+                      </button>
+                      <button 
+                        onClick={() => { setSelectedMovie(null); setSelectedSeats(1); }}
+                        className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 rounded-xl transition-colors text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => setSelectedMovie(movie._id)}
+                      className="mt-4 bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-lg hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all active:scale-95"
+                    >
+                      BOOK NOW
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+          })}
+        </div>
+      )}
+
       {paymentBooking && (
         <PaymentModal
           booking={paymentBooking}
           onClose={() => setPaymentBooking(null)}
-          onSuccess={handlePaymentSuccess}
+          onSuccess={() => {
+            toast.success('✅ Booking Successful!');
+            fetchMovies();
+            setPaymentBooking(null);
+          }}
         />
       )}
     </div>

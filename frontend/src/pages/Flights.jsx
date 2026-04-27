@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { toast } from 'react-toastify';
 import PaymentModal from '../components/PaymentModal';
 import bookingService from '../services/bookingService';
 
@@ -33,7 +34,7 @@ const Flights = ({ searchTerm }) => {
       setFlights(response.data.flights || []);
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to load flights');
+      toast.error('Failed to load flights');
     } finally {
       setLoading(false);
     }
@@ -62,14 +63,14 @@ const Flights = ({ searchTerm }) => {
 
       setSelectedFlight(null);
     } catch (error) {
-      alert(`❌ ${error.response?.data?.message || error.message}`);
+      toast.error(`❌ ${error.response?.data?.message || error.message}`);
     } finally {
       setBookingLoading(null);
     }
   };
 
   const handlePaymentSuccess = () => {
-    alert('✅ Flight booking confirmed!');
+    toast.success('✅ Flight booking confirmed!');
     fetchFlights();
     setPaymentBooking(null);
   };

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 const AdminBookings = () => {
     const navigate = useNavigate();
@@ -40,7 +41,7 @@ const AdminBookings = () => {
             setPagination(response.data.pagination);
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to load bookings');
+            toast.error('Failed to load bookings');
         } finally {
             setLoading(false);
         }
@@ -51,10 +52,10 @@ const AdminBookings = () => {
 
         try {
             await api.delete(`/admin/bookings/${bookingId}/cancel`);
-            alert('✅ Booking cancelled');
+            toast.success('✅ Booking cancelled');
             fetchBookings();
         } catch (error) {
-            alert(`❌ ${error.response?.data?.message}`);
+            toast.error(`❌ ${error.response?.data?.message || 'Failed to cancel'}`);
         }
     };
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { toast } from 'react-toastify';
 import PaymentModal from '../components/PaymentModal';
 import { AuthContext } from '../context/AuthContext';
 import bookingService from '../services/bookingService';
@@ -33,7 +34,7 @@ const Buses = ({ searchTerm }) => {
       setBuses(response.data.buses || []);
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to load buses');
+      toast.error('Failed to load buses');
     } finally {
       setLoading(false);
     }
@@ -61,12 +62,12 @@ const Buses = ({ searchTerm }) => {
       setSelectedBus(null);
     } catch (error) {
       console.error('Booking error:', error);
-      alert(`❌ ${error.response?.data?.message || error.message}`);
+      toast.error(`❌ ${error.response?.data?.message || error.message}`);
     }
   };
 
   const handlePaymentSuccess = () => {
-    alert('✅ Booking confirmed! Check your booking history.');
+    toast.success('✅ Booking confirmed! Check your booking history.');
     fetchBuses();
     setPaymentBooking(null);
   };
