@@ -1,0 +1,29 @@
+$kind: http-request
+name: Get current user
+url: '{{baseUrl}}/api/auth/me'
+method: GET
+headers:
+  - key: Authorization
+    value: 'Bearer {{token}}'
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      const token = pm.environment.get("token");
+      if (!token) {
+          console.warn("⚠️ 'token' environment variable is empty. Run the 'Login user' request first to populate it.");
+      }
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const res = pm.response.json();
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Response has user object", function () {
+          pm.expect(res).to.have.property("user");
+      });
+      pm.test("Success is true", function () {
+          pm.expect(res.success).to.be.true;
+      });
+order: 3000

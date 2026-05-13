@@ -1,0 +1,6 @@
+name: project_manager
+values:
+  - key: base_url
+    enabled: true
+    value: ''
+color: 0

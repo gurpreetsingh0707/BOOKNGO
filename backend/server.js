@@ -10,15 +10,29 @@ console.log('🚀 Starting server initialization...');
 
 const app = express();
 
-// MORE PERMISSIVE CORS
+// CORS - credentials true required for cookies
 app.use(cors({
-  origin: '*', // Allow all origins for testing
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Inline cookie parser (no external dependency needed)
+app.use((req, res, next) => {
+  const cookieHeader = req.headers.cookie;
+  req.cookies = {};
+  if (cookieHeader) {
+    cookieHeader.split(';').forEach(cookie => {
+      const [name, ...rest] = cookie.trim().split('=');
+      req.cookies[name.trim()] = decodeURIComponent(rest.join('='));
+    });
+  }
+  next();
+});
 
 // Request Logger
 app.use((req, res, next) => {
